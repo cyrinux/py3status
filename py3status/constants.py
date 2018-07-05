@@ -7,6 +7,7 @@ GENERAL_DEFAULTS = {
     'color_separator': '#333333',
     'colors': False,
     'interval': 5,
+    'max_size': False,
     'output_format': 'i3bar'
 }
 

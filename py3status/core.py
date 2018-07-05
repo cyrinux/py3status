@@ -889,6 +889,7 @@ class Py3statusWrapper:
                 output_modules[name]['module'] = self.modules[name]
                 output_modules[name]['type'] = 'py3status'
                 output_modules[name]['color'] = self.mappings_color.get(name)
+                output_modules[name]['max_size'] = self.mappings_max_size.get(name)
         # i3status modules
         for name in i3modules:
             if name not in output_modules:
@@ -897,6 +898,7 @@ class Py3statusWrapper:
                 output_modules[name]['module'] = i3modules[name]
                 output_modules[name]['type'] = 'i3status'
                 output_modules[name]['color'] = self.mappings_color.get(name)
+                output_modules[name]['max_size'] = self.mappings_max_size.get(name)
 
         self.output_modules = output_modules
 
@@ -913,21 +915,44 @@ class Py3statusWrapper:
             if hasattr(color, 'none_setting'):
                 color = None
             mappings[name] = color
+
+            max_size = self.get_config_attribute(name, 'max_size')
+            if hasattr(max_size, 'none_setting'):
+                max_size = None
+            mappings[name] = max_size
+
         # Store mappings for later use.
+        self.mappings_max_size = mappings
         self.mappings_color = mappings
 
     def process_module_output(self, module):
         """
         Process the output for a module and return a json string representing it.
         Color processing occurs here.
+        Shortened text 'short_text' processing occurs here.
         """
         outputs = module['module'].get_latest()
         color = module['color']
-        if color:
-            for output in outputs:
+        max_size = module['max_size']
+
+        for output in outputs:
+            if color:
                 # Color: substitute the config defined color
                 if 'color' not in output:
                     output['color'] = color
+
+            if 'short_text' not in output:
+                full_text = output['full_text']
+                if int(max_size) >= 1:
+                    short = full_text[:max_size] if len(full_text) > int(max_size) else full_text
+                    short = short + '..' if len(short + '..') < len(full_text) else short
+                    output['short_text'] = short
+                elif max_size is True:
+                    size = int((len(full_text) + 1) / 2)
+                    short = full_text[:size]
+                    short = short + '..' if len(short + '..') < len(full_text) else short
+                    output['short_text'] = short
+
         # Create the json string output.
         return ','.join([dumps(x) for x in outputs])
 
