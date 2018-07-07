@@ -649,19 +649,17 @@ class Module:
             if not hasattr(self.module_class, 'py3'):
                 setattr(self.module_class, 'py3', Py3(self))
 
-            # allow_urgent
-            # get the value form the config or use the module default if
+            # get the value from the config or use the module default if
             # supplied.
             fn = self._py3_wrapper.get_config_attribute
+
+            # allow_urgent
             param = fn(self.module_full_name, 'allow_urgent')
             if hasattr(param, 'none_setting'):
                 param = True
             self.allow_urgent = param
 
             # max_size
-            # get the value form the config or use the module default if
-            # supplied.
-            fn = self._py3_wrapper.get_config_attribute
             param = fn(self.module_full_name, 'max_size')
             if hasattr(param, 'none_setting'):
                 param = True
