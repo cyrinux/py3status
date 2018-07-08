@@ -194,6 +194,7 @@ class Module:
 
         error = {
             'full_text': message,
+            'short_text': message,
             'color': color,
             'instance': self.module_inst,
             'name': self.module_name,
@@ -282,7 +283,7 @@ class Module:
                 output.extend(data)
             else:
                 # if the output is not 'valid' then don't add it.
-                if data.get('full_text') or 'separator' in data:
+                if data.get('full_text') or data.get('short_text') or 'separator' in data:
                     if self.testing:
                         data['cached_until'] = method.get('cached_until')
                     output.append(data)
@@ -688,7 +689,8 @@ class Module:
                                 'instance': None,
                                 'last_output': {
                                     'name': method,
-                                    'full_text': ''
+                                    'full_text': '',
+                                    'short_text': ''
                                 },
                                 'method': method,
                                 'name': None

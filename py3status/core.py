@@ -950,21 +950,26 @@ class Py3statusWrapper:
                 if 'color' not in output:
                     output['color'] = color
 
-            if 'short_text' not in output:
-                if not short_format and output['full_text']:
+            if 'short_text' not in output and short_format:
+                if 'full_text' in output:
                     full_text = output['full_text']
-                    if max_size and int(max_size) >= 1:
-                        short = full_text[:max_size] if len(full_text) > int(max_size) else full_text
-                        short = short + '..' if len(short + '..') < len(full_text) else short
-                        output['short_text'] = short
-                    elif max_size and isinstance(max_size, str):
-                        size = int((len(full_text) + 1) / 2)
-                        short = full_text[:size]
-                        short = short + '..' if len(short + '..') < len(full_text) else short
-                        output['short_text'] = short
+                    if max_size:
+                        if isinstance(max_size, bool):
+                            max_size = int((len(full_text) + 1) / 2)
+                            self.log(max_size)
+                            short = full_text[:int(max_size)]
+                            self.log(short)
+                            short = short + '..' if len(short + '..') < len(full_text) else short
+                            self.log(short)
+                            output['short_text'] = short
+                        elif isinstance(max_size, int):
+                            short = full_text[:max_size] if len(full_text) > int(max_size) else full_text
+                            short = short + '..' if len(short + '..') < len(full_text) else short
+                            output['short_text'] = short
 
-        # Create the json string output.
-        return ','.join([dumps(x) for x in outputs])
+        ret = ','.join([dumps(x) for x in outputs])
+        self.log(ret)
+        return ret
 
     def i3bar_stop(self, signum, frame):
         self.i3bar_running = False
