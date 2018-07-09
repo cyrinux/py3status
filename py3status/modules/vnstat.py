@@ -44,6 +44,7 @@ SAMPLE OUTPUT
 """
 
 from __future__ import division  # python2 compatibility
+from pprint import pprint
 STRING_ERROR = 'vnstat: returned wrong'
 STRING_NOT_INSTALLED = 'not installed'
 
@@ -73,10 +74,16 @@ class Py3status:
         if not self.py3.check_commands('vnstat'):
             raise Exception(STRING_NOT_INSTALLED)
 
-        self.value_format = "{value:%s.%sf} {unit}" % (self.left_align, self.precision)
+        self.value_format = "{value:%s.%sf} {unit}" % (self.left_align,
+                                                       self.precision)
         # list of units, first one - value/initial_multi, second - value/1024,
         # third - value/1024^2, etc...
-        self.units = ["kb", "mb", "gb", "tb", ]
+        self.units = [
+            "kb",
+            "mb",
+            "gb",
+            "tb",
+        ]
 
     def _divide_and_format(self, value):
         # Divide a value and return formatted string
@@ -91,12 +98,15 @@ class Py3status:
     def vntstat(self):
         def filter_stat():
             # Get statistics in list of lists of words
-            out = self.py3.command_output(["vnstat", "--exportdb"]).splitlines()
+            out = self.py3.command_output(["vnstat",
+                                           "--exportdb"]).splitlines()
             for x in out:
                 if x.startswith("{};0;".format(self.statistics_type)):
                     return x
+
         try:
-            type, number, ts, rxm, txm, rxk, txk, fill = filter_stat().split(";")
+            type, number, ts, rxm, txm, rxk, txk, fill = filter_stat().split(
+                ";")
         except:
             return {
                 'cached_until': self.py3.time_in(self.cache_timeout),
@@ -104,11 +114,20 @@ class Py3status:
                 'full_text': STRING_ERROR
             }
 
+        pprint(filter_stat())
         response = {'cached_until': self.py3.time_in(self.cache_timeout)}
+
+        self.py3.log(fill)
 
         up = (int(txm) * 1024 + int(txk)) * 1024
         down = (int(rxm) * 1024 + int(rxk)) * 1024
-        stat = {"up": up, "down": down, "total": up + down}
+        estimated = int(fill) * 1024
+        stat = {
+            "up": up,
+            "down": down,
+            "total": up + down,
+            "estimated": estimated
+        }
 
         keys = list(self.coloring.keys())
         keys.sort()
@@ -120,9 +139,11 @@ class Py3status:
 
         response['full_text'] = self.py3.safe_format(
             self.format,
-            dict(total=self._divide_and_format(stat['total']),
-                 up=self._divide_and_format(stat['up']),
-                 down=self._divide_and_format(stat['down'])))
+            dict(
+                total=self._divide_and_format(stat['total']),
+                up=self._divide_and_format(stat['up']),
+                down=self._divide_and_format(stat['down']),
+                estimated=self._divide_and_format(stat['estimated'])))
         return response
 
 
