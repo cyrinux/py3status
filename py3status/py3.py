@@ -1114,8 +1114,11 @@ class Py3:
         if value is not None:
             try:
                 value = float(value)
-            except ValueError:
-                color = self._get_color('error') or self._get_color('bad')
+            except:
+                try:
+                    value = str(value)
+                except ValueError:
+                    color = self._get_color('error') or self._get_color('bad')
 
         # allow name with different values
         if isinstance(name, tuple):
