@@ -1114,11 +1114,8 @@ class Py3:
         if value is not None:
             try:
                 value = float(value)
-            except:
-                try:
-                    value = str(value)
-                except ValueError:
-                    color = self._get_color('error') or self._get_color('bad')
+            except ValueError:
+                color = None
 
         # allow name with different values
         if isinstance(name, tuple):
@@ -1136,7 +1133,7 @@ class Py3:
 
         thresholds = self._thresholds.get(name_used)
         # if value is None, pass it along. otherwise try it.
-        if value is not None and color is None and thresholds:
+        if value is not None and color is None and thresholds and not isinstance(value, basestring):
             # if gradients are enabled then we use them
             if self._get_config_setting('gradients'):
                 try:
@@ -1161,7 +1158,14 @@ class Py3:
                 for threshold in thresholds:
                     if value >= threshold[0]:
                         color = threshold[1]
-                    else:
+                    break
+
+        elif value is not None and color is None and thresholds and isinstance(value, basestring):
+            color = thresholds[0][1]
+            for threshold in thresholds:
+                if isinstance(threshold[0], basestring):
+                    if str(value) == str(threshold[0]):
+                        color = threshold[1]
                         break
 
         # save color so it can be accessed via safe_format()
