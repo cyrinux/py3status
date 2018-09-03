@@ -956,15 +956,15 @@ class Py3statusWrapper:
                     if max_size:
                         if isinstance(max_size, bool):
                             max_size = int((len(full_text) + 1) / 2)
-                            self.log(max_size)
                             short = full_text[:int(max_size)]
-                            self.log(short)
-                            short = short + '..' if len(short + '..') < len(full_text) else short
-                            self.log(short)
+                            short = short + '..' if len(short + '..') < len(
+                                full_text) else short
                             output['short_text'] = short
                         elif isinstance(max_size, int):
-                            short = full_text[:max_size] if len(full_text) > int(max_size) else full_text
-                            short = short + '..' if len(short + '..') < len(full_text) else short
+                            short = full_text[:max_size] if len(
+                                full_text) > int(max_size) else full_text
+                            short = short + '..' if len(
+                                short + '..') < len(full_text) else short
                             output['short_text'] = short
 
         ret = ','.join([dumps(x) for x in outputs])
